@@ -6,9 +6,7 @@
                 <div class="col-md-12 mt-5">
                     <div class="card">
                         <div class="card-header row">
-                            <div class="col-8">
-                                <h3>Create Blog</h3>
-                            </div>
+                            <h3>Create Blog</h3>
                         </div>
                         <div class="card-body">
                             <div class="form-group mb-3">

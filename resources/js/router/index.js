@@ -4,6 +4,7 @@ import Register from '@/components/auth/Register.vue';
 import BlogList from '@/components/blog/BlogList.vue';
 import CreateBlog from '@/components/blog/CreateBlog.vue';
 import UpdateBlog from '@/components/blog/UpdateBlog.vue';
+import ShowBlog from '@/components/blog/ShowBlog.vue';
 import Login from "@/components/auth/Login.vue";
 import { useAuthStore } from '@/stores/useAuthStore.js';
 
@@ -28,11 +29,6 @@ const router = createRouter({
             component: BlogList
         },
         {
-            path: "/blogs",
-            name: "blog.list",
-            component: BlogList
-        },
-        {
             path: "/login",
             name: "login",
             component: Login,
@@ -45,6 +41,11 @@ const router = createRouter({
             beforeEnter: [checkIfNotLogged],
         },
         {
+            path: "/blogs",
+            name: "blog.list",
+            component: BlogList
+        },
+        {
             path: '/create-blog',
             name: 'create-blog',
             component: CreateBlog,
@@ -55,6 +56,11 @@ const router = createRouter({
             name: 'updateBlog',
             component: UpdateBlog,
             beforeEnter: [checkIfLogged],
+        },
+        {
+            path: "/blog/:uuid",
+            name: "blog.show",
+            component: ShowBlog
         }
     ],
 });

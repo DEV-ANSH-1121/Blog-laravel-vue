@@ -24,7 +24,9 @@ class BlogController extends Controller
     public function show(Request $request)
     {
         $uuid = $request->uuid;
-        $blog = Blog::where('uuid', $uuid)->first();
+        $blog = Blog::where('uuid', $uuid)
+            ->with('author:id,name')
+            ->first();
         return response()->json([
             'data' => $blog
         ]);
