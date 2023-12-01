@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import Swal from 'sweetalert2';
 import router from '@/router';
 import { useAuthStore } from '@/stores/useAuthStore.js';
@@ -50,6 +50,8 @@ const data = reactive({
         blog_body: ''
     }
 });
+
+const apiErrors = ref([]);
 
 const createBlog = async () => {
     try {
