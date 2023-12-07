@@ -98,7 +98,17 @@ async function setStatus(blog, status) {
         .post('http://127.0.0.1:8000/api/blog/update', {
             "uuid": blog,
             "status": !status
-        }).then(() => getBlogs());
+        }, {
+            headers: store.getHeaderConfig.headers
+        }).then((response) => {
+            if (response.data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Status Changed Successfully',
+                    text: '',
+                });
+            }
+        });
 }
 
 async function deleteBlog(blog) {
@@ -115,6 +125,8 @@ async function deleteBlog(blog) {
             axios
                 .post('http://127.0.0.1:8000/api/blog/delete', {
                     "uuid": blog,
+                }, {
+                    headers: store.getHeaderConfig.headers
                 }).then(() => {
                     getBlogs();
                     Swal.fire('Deleted!', '', 'success');

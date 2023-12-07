@@ -15,7 +15,10 @@ class BlogController extends Controller
 {
     public function index(BlogRequest $request)
     {
-        $blogs = Blog::search($request->search)->paginate(10);
+        $blogs = Blog::when($request->search, function ($q, $f) {
+            $q->where('title', 'LIKE', "%$f%")
+                ->orWhere('blog_body', 'LIKE', "%$f%");
+        })->paginate(10);
         return response()->json([
             'data' => $blogs
         ]);

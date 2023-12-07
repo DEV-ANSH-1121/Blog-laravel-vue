@@ -15,14 +15,18 @@
                                         <div class="form-group mb-3">
                                             <input type="text" v-model="data.user.name" placeholder="Name*"
                                                 class="form-control">
+                                            <span class="text-danger" v-if="errors?.name">{{ errors.name[0] }}</span>
                                         </div>
                                         <div class="form-group mb-3">
                                             <input type="text" v-model="data.user.email" placeholder="Email*"
                                                 class="form-control">
+                                            <span class="text-danger" v-if="errors?.email">{{ errors.email[0] }}</span>
                                         </div>
                                         <div class="form-group mb-3">
                                             <input type="password" v-model="data.user.password" placeholder="Password*"
                                                 class="form-control">
+                                            <span class="text-danger" v-if="errors?.password">{{ errors.password[0]
+                                            }}</span>
                                         </div>
                                         <div class="form-group mb-3">
                                             <button @click="userAuth" class="btn btn-primary btn-sm">
@@ -42,7 +46,7 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import Swal from 'sweetalert2';
 import router from '@/router';
 import { useAuthStore } from '@/stores/useAuthStore.js';
@@ -55,25 +59,33 @@ const data = reactive({
     }
 });
 
+const errors = ref({})
+
 const store = useAuthStore();
 
 const userAuth = async () => {
-    store.clearErrors();
     try {
         await axios.get("http://localhost:8000/sanctum/csrf-cookie");
-        const response = await axios.post('/api/register', data.user);
-        if (response.data.success) {
-            store.storeUser(response.data.user);
-            router.push('/');
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: response.data.message,
+        axios.post('/api/register', data.user)
+            .then(response => {
+                if (response.data.success) {
+                    store.storeUser(response.data.user);
+                    router.push('/');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: response.data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                if (error.response.status === 422) {
+                    errors.value = error.response.data.errors
+                }
             });
-        }
     } catch (error) {
-        store.setErrors(error.response.data.errors);
+        //
     }
 }
 </script>

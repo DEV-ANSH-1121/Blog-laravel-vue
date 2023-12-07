@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import Swal from 'sweetalert2';
 import router from '@/router';
 import { useAuthStore } from '@/stores/useAuthStore.js';
@@ -46,25 +46,34 @@ const data = reactive({
     }
 });
 
+const errors = ref({});
+
 const store = useAuthStore();
 
 const userAuth = async () => {
-    store.clearErrors();
     try {
         await axios.get("http://localhost:8000/sanctum/csrf-cookie");
-        const response = await axios.post('/api/login', data.user);
-        if (response.data.success) {
-            store.storeUser(response.data.user);
-            router.push('/');
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: response.data.message,
+        axios.post('/api/login', data.user)
+            .then(response => {
+                if (response.data.success) {
+                    store.storeUser(response.data.user);
+                    router.push('/');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: response.data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                if (error.response.status === 422) {
+                    errors.value = error.response.data.errors
+                }
             });
-        }
+
     } catch (error) {
-        store.setErrors(error.response.data.errors);
+        //
     }
 }
 </script>
