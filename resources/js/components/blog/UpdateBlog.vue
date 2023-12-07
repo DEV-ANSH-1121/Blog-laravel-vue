@@ -12,10 +12,12 @@
                             <div class="form-group mb-3">
                                 <input type="text" v-model="data.updateData.title" placeholder="Title*"
                                     class="form-control">
+                                <span class="text-danger" v-if="errors?.title">{{ errors.title[0] }}</span>
                             </div>
                             <div class="form-group mb-3">
                                 <textarea v-model="data.updateData.blog_body" placeholder="Blog Body*"
                                     class="form-control"></textarea>
+                                <span class="text-danger" v-if="errors?.blog_body">{{ errors.blog_body[0] }}</span>
                             </div>
                             <div class="form-group mb-3">
                                 <button @click="updateBlog" class="btn btn-primary btn-sm">
@@ -36,7 +38,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import Swal from 'sweetalert2';
 import router from '@/router';
 import { useRoute } from 'vue-router'
@@ -54,6 +56,8 @@ const data = reactive({
     }
 });
 
+const errors = ref({});
+
 
 async function getBlog() {
     await axios
@@ -67,8 +71,22 @@ async function getBlog() {
 
 const updateBlog = async () => {
     try {
-        const response = await axios.post('/api/blog/update', data.updateData, {
+        axios.post('/api/blog/update', data.updateData, {
             headers: store.getHeaderConfig.headers
+        }).then(response => {
+            if (response.data.success) {
+                router.push('/');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.data.message,
+                });
+            }
+        }).catch(error => {
+            if (error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
         });
         if (response.data.success) {
             router.push('/');
@@ -80,7 +98,6 @@ const updateBlog = async () => {
             });
         }
     } catch (error) {
-        store.setErrors(error.response.data.errors);
     }
 }
 

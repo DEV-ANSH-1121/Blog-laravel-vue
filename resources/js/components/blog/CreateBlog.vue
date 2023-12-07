@@ -12,10 +12,12 @@
                             <div class="form-group mb-3">
                                 <input type="text" v-model="data.createData.title" placeholder="Title*"
                                     class="form-control">
+                                <span class="text-danger" v-if="errors?.title">{{ errors.title[0] }}</span>
                             </div>
                             <div class="form-group mb-3">
                                 <textarea v-model="data.createData.blog_body" placeholder="Blog Body*"
                                     class="form-control"></textarea>
+                                <span class="text-danger" v-if="errors?.blog_body">{{ errors.blog_body[0] }}</span>
                             </div>
                             <div class="form-group mb-3">
                                 <button @click="createBlog" class="btn btn-primary btn-sm">
@@ -51,24 +53,28 @@ const data = reactive({
     }
 });
 
-const apiErrors = ref([]);
+const errors = ref({});
 
 const createBlog = async () => {
     try {
-        const response = await axios.post('/api/blog/store', data.createData, {
+        await axios.post('/api/blog/store', data.createData, {
             headers: store.getHeaderConfig.headers
+        }).then(response => {
+            if (response.data.success) {
+                router.push('/');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.data.message,
+                });
+            }
+        }).catch(error => {
+            if (error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
         });
-        if (response.data.success) {
-            router.push('/');
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: response.data.message,
-            });
-        }
     } catch (error) {
-        console.log(error.response.data.errors.title);
     }
 }
 </script>
